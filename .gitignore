@@ -1,2 +1,4 @@
 .idea
 build/
+./pkg/sdk/account_test.go
+./pkg/go_abi/dataTest_abi/zionabigen

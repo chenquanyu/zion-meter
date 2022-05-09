@@ -19,8 +19,17 @@
 package sdk
 
 import (
+	"context"
+	"crypto/ecdsa"
+	"encoding/hex"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/contracts/native/utils"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -61,7 +70,7 @@ func TestTransfer(t *testing.T) {
 }
 
 // go test -v github.com/dylenfu/zion-meter/pkg/sdk -run TestStat
-func TestStat(t *testing.T) {
+func TestData(t *testing.T) {
 	n := 10000
 	startTime := uint64(time.Now().Unix())
 
@@ -75,7 +84,7 @@ func TestStat(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	contract, err := testMaster.Deploy(startTime)
+	contract, err := testMaster.DataDeploy()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,17 +93,171 @@ func TestStat(t *testing.T) {
 	sender, err := NewSender(testUrl, testChainID)
 	acc.SetSender(sender)
 	for i := 0; i < n; i++ {
-		if _, _, err := acc.Add(contract); err != nil {
+		if _, _, err := acc.CostManyGas(contract); err != nil {
 			t.Error(err)
 		}
 	}
 
 	time.Sleep(15 * time.Second)
 
-	total, err := testMaster.TxNum(contract)
+	total, err := testMaster.DataTxNum(contract)
 	if err != nil {
 		t.Fatal(err)
 	}
 	endTime := uint64(time.Now().Unix())
 	t.Logf("end time %d, spent %d, nonce after testing %d, total tx number %d", endTime, endTime-startTime, acc.nonce, total)
 }
+func TestDataPack(t *testing.T){
+	privateKey, err := crypto.HexToECDSA("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := ethclient.Dial("https://ropsten.infura.io/v3/9bca539684b6408d9dbcbb179e593eab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	chainId, err := client.ChainID(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	authAddress := crypto.PubkeyToAddress(*privateKey.Public().(*ecdsa.PublicKey))
+	nonce, err := client.PendingNonceAt(context.Background(), authAddress)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, chainId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	auth.From = authAddress
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(int64(0)) // in wei
+	var gasLimit uint64 = 0
+	auth.GasLimit = gasLimit
+	auth.GasPrice = gasPrice
+
+
+
+	inputarg:= []byte("0xffffff")
+	complexityarg:=big.NewInt(6)
+	args,err:=arguments.Pack(inputarg,complexityarg)
+	if err != nil {
+		t.Fatal(err)
+	}else{
+		print(args)
+	}
+
+	payload, err := utils.PackMethod(ABI, "costManyGas",inputarg,complexityarg)
+
+	if err != nil {
+		t.Fatal(err)
+	}else{
+		print(payload)
+	}
+
+	p,err:=ABI.Pack("costManyGas",inputarg,complexityarg)
+	if err != nil {
+		t.Fatal(err)
+	}else {
+		print(p)
+	}
+
+	print(args,"--",payload,"--",p)
+	datacontract:=common.HexToAddress("")
+	tx:=types.NewTx(&types.LegacyTx{
+		Nonce:auth.Nonce.Uint64(),
+		GasPrice:auth.GasPrice,
+		Gas:auth.GasLimit,
+		To: &datacontract,
+		Value:auth.Value,
+		Data:payload,
+	})
+	signer := types.LatestSignerForChainID(chainId)
+	tx, err = types.SignTx(tx, signer, privateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = client.SendTransaction(context.Background(), tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	println(tx.Hash().Hex())
+
+
+}
+func TestDataPackMethod(t *testing.T){
+	privateKey, err := crypto.HexToECDSA("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	authAddress := crypto.PubkeyToAddress(*privateKey.Public().(*ecdsa.PublicKey))
+	client, err := ethclient.Dial("https://ropsten.infura.io/v3/9bca539684b6408d9dbcbb179e593eab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	url:="https://ropsten.infura.io/v3/9bca539684b6408d9dbcbb179e593eab"
+	chainId, err := client.ChainID(context.Background())
+	ss:=chainId.String()
+	chainid,err:=strconv.Atoi(ss)
+
+	sender,err:=NewSender(url,uint64(chainid))
+	if err != nil {
+		t.Fatal(err)
+	}
+	nonce, err := client.PendingNonceAt(context.Background(), authAddress)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c:=&Account{
+		pk:privateKey,
+		address: authAddress,
+		nonce:nonce,
+		sender:sender,
+	}
+	datacontract:=common.HexToAddress("0x3021edb975013e5BF6Efa4fBC39b70B1453d9082")
+	inputarg,err:=hex.DecodeString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+	if err != nil {
+		t.Fatal(err)
+	}
+	complexityarg:=big.NewInt(8)
+	payload, err :=utils.PackMethod(ABI, "costManyGas",inputarg,complexityarg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	print(common.Bytes2Hex(payload))
+	//p,err:=hex.DecodeString("0xef22dc29000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000003ffffff0000000000000000000000000000000000000000000000000000000000")
+	txx, err := c.newSignedTx(datacontract, big.NewInt(0), payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := c.SendTx(txx); err != nil {
+		t.Fatal(err)
+	}
+	println(txx.Hash().Hex())
+}
+func Test(t *testing.T){
+	b:=[]byte("0xfffff")
+	//s:=string(b)
+	bb:=common.Bytes2Hex(b)
+	println(bb)
+
+	s:="ffffff"
+	d,err:=hex.DecodeString(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bbb:=common.Bytes2Hex(d)
+	println(d,"-----",bbb)
+
+	inputarg:=d
+	complexityarg:=big.NewInt(8)
+	payload, err :=utils.PackMethod(ABI, "costManyGas",inputarg,complexityarg)
+	println(common.Bytes2Hex(payload))
+}
+

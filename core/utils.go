@@ -72,18 +72,18 @@ func generateAccounts() (int, [][]*User, error) {
 }
 
 func resetOrDeployContract(acc *sdk.Account, oldContract common.Address, startTime uint64) (common.Address, error) {
-	if acc.Exist(oldContract) {
-		if _, err := acc.Reset(oldContract, startTime); err != nil {
+	if acc.DataExist(oldContract) {
+		if _, err := acc.DataReset(oldContract, startTime); err != nil {
 			return common.EmptyAddress, err
 		}
 		return oldContract, nil
 	}
 
-	newContract, err := acc.Deploy()
+	newContract, err := acc.DataDeploy()
 	if err != nil {
 		return common.EmptyAddress, err
 	}
-	if _, err := acc.Reset(newContract, startTime); err != nil {
+	if _, err := acc.DataReset(newContract, startTime); err != nil {
 		return newContract, err
 	}
 	return newContract, nil

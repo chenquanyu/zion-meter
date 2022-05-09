@@ -113,7 +113,7 @@ func (u *User) run(contract common.Address) {
 	for {
 		select {
 		case <-u.sig:
-			if tx, nonce, err := u.acc.Add(contract); err != nil {
+			if tx, nonce, err := u.acc.CostManyGas(contract); err != nil {
 				log.Errorf("send tx %s failed, nonce %d, err: %v", tx.Hex(), nonce, err)
 				u.acc.ResetNonce(nonce)
 			}
@@ -244,7 +244,7 @@ func (b *Box) CalculateTPS() {
 	for {
 		select {
 		case <-ticker.C:
-			total, err := b.master.TxNum(b.contract)
+			total, err := b.master.DataTxNum(b.contract)
 			if err != nil {
 				log.Errorf("get total tx number failed, err: %v", err)
 			} else if total == 0 {

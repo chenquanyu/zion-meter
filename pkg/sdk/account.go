@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	dataTest "github.com/dylenfu/zion-meter/pkg/go_abi/dataTest_abi"
 	"math/big"
 	"strings"
 	"time"
@@ -28,7 +29,7 @@ var ErrNoSender = errors.New("no sender")
 var ABI *abi.ABI
 
 func init() {
-	ab, err := abi.JSON(strings.NewReader(stat.StatABI))
+	ab, err := abi.JSON(strings.NewReader(dataTest.DataTestABI))
 	if err != nil {
 		panic(fmt.Sprintf("failed to load abi json string: [%v]", err))
 	}
@@ -171,6 +172,7 @@ func (c *Account) Reset(contract common.Address, startTime uint64) (common.Hash,
 		return common.EmptyHash, ErrNoSender
 	}
 	st, err := stat.NewStat(contract, c.sender.client)
+	//st, err := dataTest.NewDataTest(contract, c.sender.client)
 	if err != nil {
 		return common.EmptyHash, err
 	}
