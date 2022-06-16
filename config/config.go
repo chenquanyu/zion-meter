@@ -59,13 +59,13 @@ func LoadConfig(filepath string, group, account int, sLastTime string) {
 		panic(err)
 	}
 
-	if group > 0 {
-		Conf.Groups = group
-	}
-	if account > 0 {
-		Conf.AccsPerGroup = account
-	}
-	if sLastTime != "" {
-		Conf.LastTime = sLastTime
-	}
+	// if group > 0 {
+	// 	Conf.Groups = group
+	// }
+	// if account > 0 {
+	// 	Conf.AccsPerGroup = account
+	// }
+	// if sLastTime != "" {
+	// 	Conf.LastTime = sLastTime
+	// }
 }
