@@ -1,0 +1,14 @@
+{
+    "Workspace": "string",
+    "ChainID": 1089,
+    "Groups": 3,
+    "AccsPerGroup": 20,
+    "Sharding": false,
+    "FirstMachine": "127.0.0.1",
+    "LastTime": "10m",
+    "Contract": "",
+    "NodeKey": "26cc96a0d256d45e1515bf325bec1925746d796b3637b147f35a01d6c2d6399b",
+    "Nodes": [
+        "http://127.0.0.1:8545"
+    ]
+}

@@ -297,14 +297,14 @@ func (c *Account) SendTx(signedTx *types.Transaction) error {
 }
 
 func (c *Account) makeDeployAuth() *bind.TransactOpts {
-	auth := bind.NewKeyedTransactor(c.pk)
+	auth, _ := bind.NewKeyedTransactorWithChainID(c.pk, c.sender.signer.ChainID())
 	auth.GasLimit = 500000
 	auth.Nonce = new(big.Int).SetUint64(c.Nonce())
 	return auth
 }
 
 func (c *Account) makeAuth() *bind.TransactOpts {
-	auth := bind.NewKeyedTransactor(c.pk)
+	auth, _ := bind.NewKeyedTransactorWithChainID(c.pk, c.sender.signer.ChainID())
 	auth.GasLimit = 50000
 	auth.Nonce = new(big.Int).SetUint64(c.Nonce())
 	return auth
