@@ -16,7 +16,7 @@ var (
 	gasUsage = new(big.Int).Mul(big.NewInt(1), ETH1)
 
 	costInput, _   = hex.DecodeString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
-	costComplexity = uint64(8)
+	costComplexity = uint64(0)
 )
 
 // TPS try to test hotstuff tps, params nodeList represents multiple ethereum rpc url addresses,
@@ -222,7 +222,7 @@ func (b *Box) Simulate() {
 			if _, ok := b.txsRecords[idx]; !ok {
 				b.txsRecords[idx] = b.startTps
 			} else {
-				b.txsRecords[idx] += 1
+				b.txsRecords[idx] += 10
 			}
 			txn := b.txsRecords[idx]
 			if txn > len(group) {

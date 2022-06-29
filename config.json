@@ -2,7 +2,7 @@
     "Workspace": "string",
     "ChainID": 1089,
     "Groups": 3,
-    "AccsPerGroup": 20,
+    "AccsPerGroup": 200,
     "Sharding": false,
     "FirstMachine": "127.0.0.1",
     "LastTime": "10m",

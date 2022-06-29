@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	MinTPS   = 5
+	MinTPS   = 20
 	MinGroup = 2
 )
 
@@ -57,15 +57,5 @@ func LoadConfig(filepath string, group, account int, sLastTime string) {
 
 	if err := json.Unmarshal(data, &Conf); err != nil {
 		panic(err)
-	}
-
-	if group > 0 {
-		Conf.Groups = group
-	}
-	if account > 0 {
-		Conf.AccsPerGroup = account
-	}
-	if sLastTime != "" {
-		Conf.LastTime = sLastTime
 	}
 }

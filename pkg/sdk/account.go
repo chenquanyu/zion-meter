@@ -351,23 +351,25 @@ func (c *Account) newUnsignedTx(to common.Address, amount *big.Int, data []byte)
 	}
 
 	nonce := c.Nonce()
-	gasPrice, err := c.sender.client.SuggestGasPrice(context.Background())
-	if err != nil {
-		return nil, err
-	}
+	// gasPrice, err := c.sender.client.SuggestGasPrice(context.Background())
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	callMsg := ethereum.CallMsg{
-		From:     c.Address(),
-		To:       &to,
-		Gas:      0,
-		GasPrice: gasPrice,
-		Value:    amount,
-		Data:     data,
-	}
-	gasLimit, err := c.sender.client.EstimateGas(context.Background(), callMsg)
-	if err != nil {
-		return nil, fmt.Errorf("estimate gas limit error: %s", err.Error())
-	}
+	// callMsg := ethereum.CallMsg{
+	// 	From:     c.Address(),
+	// 	To:       &to,
+	// 	Gas:      0,
+	// 	GasPrice: gasPrice,
+	// 	Value:    amount,
+	// 	Data:     data,
+	// }
+	// gasLimit, err := c.sender.client.EstimateGas(context.Background(), callMsg)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("estimate gas limit error: %s", err.Error())
+	// }
+	gasLimit := uint64(1000000)
+	gasPrice := big.NewInt(1000000000)
 
 	return types.NewTx(&types.LegacyTx{
 		Nonce:    nonce,
